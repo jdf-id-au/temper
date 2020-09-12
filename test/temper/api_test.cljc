@@ -6,7 +6,8 @@
                        [cljs.spec.alpha :as s]
                        [cljs.spec.gen.alpha :as gen]])
 
-            [temper.api :as t]))
+            [temper.api :as t]
+            [tick.alpha.api :as tk]))
 
 (def ds
   "Vector of unique dates, sorted ascending."
@@ -51,10 +52,10 @@
   (is (nil? (t/latest nil nil))))
 
 (deftest duration
-  (let [d1 (t/new-date 2018 1 1)
-        d2 (t/new-date 2018 1 8)
-        d3 (t/new-date 2019 9 21)
-        d4 (t/new-date 2019 10 20)]
+  (let [d1 (tk/new-date 2018 1 1)
+        d2 (tk/new-date 2018 1 8)
+        d3 (tk/new-date 2019 9 21)
+        d4 (tk/new-date 2019 10 20)]
     (testing "Duration calculation"
       (is (= (t/in-days d1 d2) 7))
       (is (= (t/in-days d1 d1) 0))

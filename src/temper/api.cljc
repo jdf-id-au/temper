@@ -1,4 +1,5 @@
 (ns temper.api
+  ; Just cope with start and end being opposites (vs start/finish begin/end)!
   (:require [tick.alpha.api :as t]
             [tick.core]
             [tick.format]
@@ -14,34 +15,27 @@
                      (java.util Locale)]))
   (:refer-clojure :exclude [format]))
 
-(def new-date t/new-date)
-(def date t/date)
 (defn date-time
-  "Change space in `yyyy-MM-DD HH:MM...` to T, then convert.
-   For converting sqlite `text default current_timestamp`s." ; TODO could format in sqlite...
+  "In `yyyy-MM-DD*HH:MM...`, make character at * a T, then convert.
+   For converting sqlite `text default current_timestamp`s, which have a space in that position."
+  ; see "extended format" at https://www.iso.org/obp/ui/#iso:std:iso:8601:-1:ed-1:v1:en
   [s] (if s (t/date-time (apply str (-> s vec (assoc 10 "T"))))))
-(defn format [f d]
-  ; FIXME handle locale
-  (t/format (tick.format/formatter f
-              #?(:clj Locale/ENGLISH
-                 :cljs (oget Locale "ENGLISH"))) d))
+
+(def locale #?(:clj Locale/ENGLISH :cljs (oget Locale "ENGLISH")))
+(defn format [f d] (t/format (tick.format/formatter f locale) d))
 
 (defn this-year [] (t/int (t/year)))
-(defn today [] (new-date))
-(defn now [] (t/at (new-date) (t/new-time)))
+(defn now "Local now (tick's is UTC)." [] (t/at (t/new-date) (t/new-time)))
 
-(def month-abbr (partial format "MMM"))
-#_(def days (map #(t/format (tick.format/formatter "EEEE") %)
-              #?(:clj (DayOfWeek/values) :cljs ((.-values DayOfWeek)))))
-#_(def months (map #(t/format (tick.format/formatter "MMMM") %)
-                #?(:cljs (Month/values) :cljs ((.-values Month)))))
+(def days-of-week (map (partial format "EEE") #?(:clj (DayOfWeek/values) :cljs ((.-values DayOfWeek)))))
+(def months-of-year (map (partial format "MMM") #?(:clj (Month/values) :cljs ((.-values Month)))))
 
 (defn date-range-text [[start end]]
   (let [expand (juxt t/year t/month t/day-of-month)
         [y1 m1 d1] (expand start)
         [y2 m2 d2] (expand end)
-        mn1 (month-abbr start)
-        mn2 (month-abbr end)
+        mn1 (format "MMM" start)
+        mn2 (format "MMM" end)
         -- "–" ; this is an en dash
         _ " "]
     (cond
@@ -153,12 +147,12 @@
   ([n] (minutes-away n (now))))
 (defn days-away
   ([n from] (t/+ from (t/new-period n :days)))
-  ([n] (days-away n (today))))
+  ([n] (days-away n (t/today))))
 (def day-after (partial days-away 1))
 (def day-before (partial days-away -1))
 (defn years-away
   ([n from] (t/+ from (t/new-period n :years)))
-  ([n] (years-away n (today))))
+  ([n] (years-away n (t/today))))
 (s/def ::date
   (s/with-gen #(instance? LocalDate %)
               #(gen/fmap days-away (gen/large-integer* {:min -50 :max +300}))))
