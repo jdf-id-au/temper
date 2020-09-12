@@ -27,8 +27,8 @@
 (defn this-year [] (t/int (t/year)))
 (defn now "Local now (tick's is UTC)." [] (t/at (t/new-date) (t/new-time)))
 
-(def days-of-week (map (partial format "EEE") #?(:clj (DayOfWeek/values) :cljs ((.-values DayOfWeek)))))
-(def months-of-year (map (partial format "MMM") #?(:clj (Month/values) :cljs ((.-values Month)))))
+(def days-of-week (mapv (partial format "EEE") #?(:clj (DayOfWeek/values) :cljs ((.-values DayOfWeek)))))
+(def months-of-year (mapv (partial format "MMM") #?(:clj (Month/values) :cljs ((.-values Month)))))
 
 (defn date-range-text [[start end]]
   (let [expand (juxt t/year t/month t/day-of-month)
@@ -43,8 +43,6 @@
       (= [y1 m1] [y2 m2]) (str d1 -- d2 _ mn2 _ y2)
       (= y1 y2) (str d1 _ mn1 -- d2 _ mn2 _ y2)
       :else (str d1 _ mn1 _ y1 -- d2 _ mn2 _ y2))))
-
-(def before? t/<)
 
 (defn within?
   "Is the first date (or date pair) within the second date pair? Accommodate nil in pair.
@@ -125,12 +123,12 @@
 
 (defn earliest [& ds]
   (reduce (fn ([])
-              ([d1 d2] (if (before? d1 d2) d1 d2)))
+              ([d1 d2] (if (t/< d1 d2) d1 d2)))
           (remove nil? ds)))
 
 (defn latest [& ds]
   (reduce (fn ([])
-              ([d1 d2] (if (before? d1 d2) d2 d1)))
+              ([d1 d2] (if (t/< d1 d2) d2 d1)))
           (remove nil? ds)))
 
 (defn date-bound [bound field [start end]]
