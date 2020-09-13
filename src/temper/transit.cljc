@@ -29,8 +29,7 @@
                               Month
                               Duration
                               Year
-                              YearMonth)
-                   (java.io ByteArrayInputStream ByteArrayOutputStream))))
+                              YearMonth))))
 
 (def time-classes
   {'period Period
@@ -57,22 +56,3 @@
   {:handlers
    (into {} (for [[sym fun] time-literals.read-write/tags]
               [(name sym) (transit/read-handler fun)]))})   ; omit "time/" for brevity
-
-(defn ->transit "Encode data structure to transit."
-  [arg]
-  #?(:clj  (let [out (ByteArrayOutputStream.)
-                 writer (transit/writer out :json write-handlers)]
-             (transit/write writer arg)
-             (.toString out))
-     :cljs (transit/write (transit/writer :json write-handlers) arg)))
-
-(defn <-transit "Decode data structure from transit."
-  [json]
-  #?(:clj  (try (let [in (ByteArrayInputStream. (.getBytes json))
-                      reader (transit/reader in :json read-handlers)]
-                  (transit/read reader))
-                (catch Exception e
-                  ;(log/warn "Invalid message" json (.getMessage e))
-                  :invalid-message))
-     :cljs (transit/read (transit/reader :json read-handlers) json)))
-           ; TODO catch js errors
