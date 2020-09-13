@@ -9,8 +9,7 @@
                        [cljs.spec.gen.alpha :as gen]
                        [clojure.test.check.generators]
                        [java.time :refer [LocalDate LocalDateTime DayOfWeek Month]]
-                       ["@js-joda/locale_en" :refer [Locale]]
-                       [oops.core :refer [oget]]]))
+                       ["@js-joda/locale_en" :refer [Locale]]]))
   (:import #?@(:clj [[java.time LocalDate LocalDateTime DayOfWeek Month]
                      (java.util Locale)]))
   (:refer-clojure :exclude [format]))
@@ -21,7 +20,7 @@
   ; see "extended format" at https://www.iso.org/obp/ui/#iso:std:iso:8601:-1:ed-1:v1:en
   [s] (if s (t/date-time (apply str (-> s vec (assoc 10 "T"))))))
 
-(def locale #?(:clj Locale/ENGLISH :cljs (oget Locale "ENGLISH")))
+(def locale #?(:clj Locale/ENGLISH :cljs (.-ENGLISH Locale)))
 (defn format [f d] (t/format (tick.format/formatter f locale) d))
 
 (defn this-year [] (t/int (t/year)))

@@ -1,6 +1,5 @@
 (ns temper.client
-  (:require [oops.core :refer [oget oset!]]
-            [tick.alpha.api :as t]
+  (:require [tick.alpha.api :as t]
             [tick.format]
             [java.time :refer [DayOfWeek LocalDateTime LocalDate]]
             ["@js-joda/locale_en" :refer [Locale]]))
@@ -23,7 +22,7 @@
         dateFormat "MMMM d"
         ; FIXME ignores locale
         fmt (fn [d formatString]
-              (if d (t/format (tick.format/formatter formatString (oget Locale "ENGLISH")) d)
+              (if d (t/format (tick.format/formatter formatString (.-ENGLISH Locale)) d)
                     ""))
         parse (fn [v]
                 (letfn
