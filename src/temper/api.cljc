@@ -25,6 +25,7 @@
 
 (defn this-year [] (t/int (t/year)))
 (defn now "Local now (tick's is UTC)." [] (t/at (t/new-date) (t/new-time)))
+(defn localise [dt] (-> dt (t/in (t/zone)) t/date-time))
 
 (def days-of-week (mapv (partial format "EEE") #?(:clj (DayOfWeek/values) :cljs ((.-values DayOfWeek)))))
 (def months-of-year (mapv (partial format "MMM") #?(:clj (Month/values) :cljs ((.-values Month)))))
