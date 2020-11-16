@@ -6,9 +6,7 @@
 
 (defn tick-utils
   "Adapt tick api for @date-io for use by @material-ui/pickers.
-   Derived from date-io's moment.utils.ts, date-io_interface.ts and *.test.ts .
-   Pickers don't cope well with nil date yet so need to protect them!"
-  ; https://github.com/mui-org/material-ui-pickers/issues/1204
+   Derived from date-io's moment.utils.ts, date-io_interface.ts and *.test.ts ."
   [props]
   (let [; NB I think these are exposed via reify's (:locals &env)
         ; ignore (.-instance props) method of passing in date library
@@ -81,23 +79,23 @@
       (format [_ d formatString] (fmt d formatString))
       (formatNumber [_ n] n)
 
-      (getHours [_ d] (t/hour d))
+      (getHours [_ d] (some-> d t/hour))
       (setHours [_ d c] (t/at (t/date d) (t/new-time c (t/minute d))))
 
-      (getMinutes [_ d] (t/minute d))
+      (getMinutes [_ d] (some-> d t/minute))
       (setMinutes [_ d c] (t/at (t/date d) (t/new-time (t/hour d) c)))
 
-      (getSeconds [_ d] (t/second d))
+      (getSeconds [_ d] (some-> d t/second))
       (setSeconds [_ d c] (t/at (t/date d) (t/new-time (t/hour d) (t/minute d) c)))
 
-      (getMonth [_ d] (t/month d))
+      (getMonth [_ d] (some-> d t/month))
       (setMonth [_ d c] (t/new-date (t/int (t/year d)) c (t/day-of-month d)))
-      (getNextMonth [_ d] (t/+ d (t/new-period 1 :months)))
-      (getPreviousMonth [_ d] (t/- d (t/new-period 1 :months)))
+      (getNextMonth [_ d] (some-> d (t/+ (t/new-period 1 :months))))
+      (getPreviousMonth [_ d] (some-> d (t/- (t/new-period 1 :months))))
 
-      (getMonthArray [_ d] (let [start (t/beginning (t/year d))]
+      (getMonthArray [_ d] (if-let [start (some-> d t/year t/beginning)]
                              (clj->js (map #(t/+ start (t/new-period % :months)) (range 12)))))
-      (getYear [_ d] (t/year d))
+      (getYear [_ d] (some-> d t/year))
       (setYear [_ d y] (t/new-date y (t/month d) (t/day-of-month d)))
 
       (mergeDateAndTime [_ d t]
@@ -107,17 +105,17 @@
                                      ((.-values DayOfWeek)))))
       (getWeekArray [_ d]
         ; Rows of days on a Monday-based calendar, including adjacent months if req.
-        (let [start-month (-> d t/year-month t/beginning)
-              ; t/end identifies 00:00 the next day as the end of the month, so back up 1d:
-              end-month (-> d t/year-month t/end (#(t/- % (t/new-period 1 :days))))
-              ; ISO-8601 Monday = 1, Sunday = 7 in java.time
-              start-dow-offset (-> start-month t/day-of-week .value dec)
-              end-dow-offset (-> end-month t/day-of-week .value dec (#(- 6 %)))
-              start (t/- start-month (t/new-period start-dow-offset :days))
-              end (t/+ end-month (t/new-period end-dow-offset :days))
-              days (.until start end (:days tick.core/unit-map))
-              dates (map #(t/+ start (t/new-period % :days)) (range (inc days)))]
-          (clj->js (partition-all 7 dates))))
+        (if-let [start-month (some-> d t/year-month t/beginning)]
+          (let [; t/end identifies 00:00 the next day as the end of the month, so back up 1d:
+                end-month (-> d t/year-month t/end (#(t/- % (t/new-period 1 :days))))
+                ; ISO-8601 Monday = 1, Sunday = 7 in java.time
+                start-dow-offset (-> start-month t/day-of-week .value dec)
+                end-dow-offset (-> end-month t/day-of-week .value dec (#(- 6 %)))
+                start (t/- start-month (t/new-period start-dow-offset :days))
+                end (t/+ end-month (t/new-period end-dow-offset :days))
+                days (.until start end (:days tick.core/unit-map))
+                dates (map #(t/+ start (t/new-period % :days)) (range (inc days)))]
+            (clj->js (partition-all 7 dates)))))
       (getYearRange [_ s e]
         (let [start (t/beginning (t/year s))
               end (t/end (t/year e))
@@ -125,12 +123,12 @@
           (apply array (map #(t/+ start (t/new-period % :years)) (range (inc years))))))
 
       (getMeridiemText [_ m] (case m "am" "AM" "PM"))
-      (getCalendarHeaderText [_ d] (fmt d yearMonthFormat))
-      (getDatePickerHeaderText [_ d] (fmt d "E d MMM"))
-      (getDateTimePickerHeaderText [_ d] (fmt d "d MMM"))
-      (getMonthText [_ d] (fmt d "MMMM"))
-      (getDayText [_ d] (fmt d "d"))
-      (getHourText [_ d m] (fmt d (if m "hh" "HH")))
-      (getMinuteText [_ d] (fmt d "mm"))
-      (getSecondText [_ d] (fmt d "ss"))
-      (getYearText [_ d] (fmt d "YYYY")))))
+      (getCalendarHeaderText [_ d] (some-> d (fmt yearMonthFormat)))
+      (getDatePickerHeaderText [_ d] (some-> d (fmt "E d MMM")))
+      (getDateTimePickerHeaderText [_ d] (some-> d (fmt "d MMM")))
+      (getMonthText [_ d] (some-> d (fmt "MMMM")))
+      (getDayText [_ d] (some-> d (fmt "d")))
+      (getHourText [_ d m] (some-> d (fmt (if m "hh" "HH"))))
+      (getMinuteText [_ d] (some-> d (fmt "mm")))
+      (getSecondText [_ d] (some-> d (fmt "ss")))
+      (getYearText [_ d] (some-> d (fmt "YYYY"))))))
