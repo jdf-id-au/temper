@@ -11,7 +11,7 @@
     "url": "git+https://github.com/jdf-id-au/temper.git"
   },
   "author": "Jeremy Field <temper@jdf.id.au>",
-  "license": "MIT",
+  "license": "Unlicense",
   "bugs": {
     "url": "https://github.com/jdf-id-au/temper/issues"
   },
