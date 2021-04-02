@@ -101,6 +101,7 @@
       ; no start-a or end-a
       true)))
 
+(defn in-minutes "Duration in minutes." [d1 d2] (.until d1 d2 (tick.core/unit-map :minutes)))
 (defn in-days "Duration in days." [d1 d2] (.until d1 d2 (tick.core/unit-map :days)))
 
 (defn duration
