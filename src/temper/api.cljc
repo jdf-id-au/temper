@@ -141,6 +141,9 @@
 
 ; Spec
 
+(defn seconds-away
+  ([n from] (t/+ from (t/new-duration n :seconds)))
+  ([n] (seconds-away n (now))))
 (defn minutes-away
   ([n from] (t/+ from (t/new-duration n :minutes)))
   ([n] (minutes-away n (now))))
