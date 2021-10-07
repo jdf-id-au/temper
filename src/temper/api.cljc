@@ -101,12 +101,13 @@
       ; no start-a or end-a
       true)))
 
-(defn in-minutes "Duration in minutes." [d1 d2] (.until d1 d2 (tick.core/unit-map :minutes)))
-(defn in-days "Duration in days." [d1 d2] (.until d1 d2 (tick.core/unit-map :days)))
+(defn in "Duration in whole units." [unit d1 d2] (.until d1 d2 (tick.core/unit-map unit)))
+(defn in-minutes "Duration in whole minutes." [d1 d2] (in :minutes d1 d2))
+(defn in-days "Duration in whole days." [d1 d2] (in :days d1 d2))
 
 (defn duration
   "Number of days spanned by date pair (inclusive)."
-  [date-pair] (some->> date-pair (apply in-days) inc))
+  [date-pair] (some->> date-pair (apply in :days) inc))
 
 (defn overlapping?
   "Do any of the supplied pairs of dates overlap? Defaults to excluding [nil nil] pairs."
