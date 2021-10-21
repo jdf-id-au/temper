@@ -17,8 +17,10 @@
   },
   "homepage": "https://github.com/jdf-id-au/temper",
   "dependencies": {
-    "@js-joda/core": "^1.12.0",
+    "@cljs-oss/module-deps": "^1.1.1",
+    "@js-joda/core": "^3.2.0",
     "@js-joda/locale_en": "^3.1.1",
-    "@js-joda/timezone": "^2.2.0"
+    "@js-joda/locale_en-us": "^3.1.1",
+    "@js-joda/timezone": "^2.5.0"
   }
 }
