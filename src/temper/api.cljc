@@ -21,7 +21,9 @@
   [s] (if s (t/date-time (apply str (-> s vec (assoc 10 "T"))))))
 
 (def locale #?(:clj Locale/ENGLISH :cljs (.-ENGLISH Locale)))
-(defn format [f d] (t/format (tick.format/formatter f locale) d))
+(defn format
+  "Remember all the perils of java date formatting. You want dd/MM/yyyy HH:mm:ss or :iso."
+  [f d] (t/format (tick.format/formatter f locale) d))
 
 (defn this-year [] (t/int (t/year)))
 (defn now "Local now (tick's is UTC)." [] (t/at (t/new-date) (t/new-time)))
