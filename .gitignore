@@ -1,4 +1,7 @@
+.clj-kondo/
+.cpcache
 .idea/
+.lsp/
 node_modules/
 .nrepl-port
 temper.iml
