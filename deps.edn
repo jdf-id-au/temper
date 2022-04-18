@@ -1,6 +1,7 @@
 {:paths ["src"]
  :deps {org.clojure/test.check {:mvn/version "1.1.1"}
-        tick/tick {:mvn/version "0.4.32"}}
+        tick/tick {:git/url "https://github.com/juxt/tick.git"
+                   :sha "6e88746805acc66c00eacb9a2ba0ff7e95391ad7"}}
  :aliases
  {:dev {:extra-paths ["dev" "test"]
         :extra-deps {org.clojure/clojure {:mvn/version "1.11.1"}

@@ -1,8 +1,7 @@
 (ns temper.api
   ; Just cope with start and end being opposites (vs start/finish begin/end)!
-  (:require [tick.alpha.api :as t]
-            [tick.core]
-            [tick.format]
+  (:require [tick.core :as t]
+            [tick.locale-en-us]
             #?@(:clj [[clojure.spec.alpha :as s]
                       [clojure.spec.gen.alpha :as gen]]
                 :cljs [[cljs.spec.alpha :as s]
@@ -18,12 +17,12 @@
   "In `yyyy-MM-DD*HH:MM...`, make character at * a T, then convert.
    For converting sqlite `text default current_timestamp`s, which have a space in that position."
   ; see "extended format" at https://www.iso.org/obp/ui/#iso:std:iso:8601:-1:ed-1:v1:en
-  [s] (if s (t/date-time (apply str (-> s vec (assoc 10 "T"))))))
+  [s] (when s (t/date-time (apply str (-> s vec (assoc 10 "T"))))))
 
 (def locale #?(:clj Locale/ENGLISH :cljs (.-ENGLISH Locale)))
 (defn format
   "Remember all the perils of java date formatting. You want dd/MM/yyyy HH:mm:ss or :iso."
-  [f d] (t/format (tick.format/formatter f locale) d))
+  [f d] (t/format (t/formatter f locale) d))
 
 (defn this-year [] (t/int (t/year)))
 (defn now "Local now (tick's is UTC)." [] (t/at (t/new-date) (t/new-time)))
@@ -136,8 +135,8 @@
           (remove nil? ds)))
 
 (defn date-bound [bound field [start end]]
-  (let [lower (t/- (t/new-date) (t/new-period 1 :years))
-        upper (t/+ (t/new-date) (t/new-period 10 :years))]
+  (let [lower (t/<< (t/new-date) (t/new-period 1 :years))
+        upper (t/>> (t/new-date) (t/new-period 10 :years))]
     (case bound
       :min (case field :start (earliest lower start) :end (or start lower))
       :max (case field :start (or end upper) :end (latest upper end)))))
@@ -145,18 +144,18 @@
 ; Spec
 
 (defn seconds-away
-  ([n from] (t/+ from (t/new-duration n :seconds)))
+  ([n from] (t/>> from (t/new-duration n :seconds)))
   ([n] (seconds-away n (now))))
 (defn minutes-away
-  ([n from] (t/+ from (t/new-duration n :minutes)))
+  ([n from] (t/>> from (t/new-duration n :minutes)))
   ([n] (minutes-away n (now))))
 (defn days-away
-  ([n from] (t/+ from (t/new-period n :days)))
+  ([n from] (t/>> from (t/new-period n :days)))
   ([n] (days-away n (t/today))))
 (def day-after (partial days-away 1))
 (def day-before (partial days-away -1))
 (defn years-away
-  ([n from] (t/+ from (t/new-period n :years)))
+  ([n from] (t/>> from (t/new-period n :years)))
   ([n] (years-away n (t/today))))
 (s/def ::date
   (s/with-gen #(instance? LocalDate %)

@@ -5,9 +5,8 @@
                 :cljs [[cljs.test :refer-macros [deftest is testing]]
                        [cljs.spec.alpha :as s]
                        [cljs.spec.gen.alpha :as gen]])
-
             [temper.api :as tm]
-            [tick.alpha.api :as t]))
+            [tick.core :as t]))
 
 (def ds
   "Vector of unique dates, sorted ascending."
