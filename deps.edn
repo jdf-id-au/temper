@@ -1,10 +1,9 @@
 {:paths ["src"]
  :deps {org.clojure/test.check {:mvn/version "1.1.1"}
-        tick/tick {:git/url "https://github.com/juxt/tick.git"
-                   :sha "6e88746805acc66c00eacb9a2ba0ff7e95391ad7"}}
+        tick/tick {:mvn/version "0.5.0"}}
  :aliases
  {:dev {:extra-paths ["dev" "test"]
         :extra-deps {org.clojure/clojure {:mvn/version "1.11.1"}
-                     org.clojure/clojurescript {:mvn/version "1.11.4"}
-                     thheller/shadow-cljs {:mvn/version "2.18.0"}
+                     org.clojure/clojurescript {:mvn/version "1.11.60"}
+                     thheller/shadow-cljs {:mvn/version "2.20.12"}
                      binaryage/devtools {:mvn/version "1.0.6"}}}}}

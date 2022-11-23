@@ -8,7 +8,7 @@
                        [cljs.spec.gen.alpha :as gen]
                        [clojure.test.check.generators]
                        [java.time :refer [LocalDate LocalDateTime DayOfWeek Month]]
-                       ["@js-joda/locale_en" :refer [Locale]]]))
+                       ["@js-joda/locale_en" :refer [Locale]]])) ; also see tick.locale-en-us
   (:import #?@(:clj [[java.time LocalDate LocalDateTime DayOfWeek Month]
                      (java.util Locale)]))
   (:refer-clojure :exclude [format]))
@@ -25,7 +25,7 @@
   [f d] (t/format (t/formatter f locale) d))
 
 (defn this-year [] (t/int (t/year)))
-(defn now "Local now (tick's is UTC)." [] (t/at (t/new-date) (t/new-time)))
+(defn now "Local now (tick's is UTC)." [] (t/at (t/new-date) (t/new-time))) ; busywork vs (t/date-time)
 (defn localise [dt] (-> dt (t/in (t/zone)) t/date-time))
 
 (def days-of-week (mapv (partial format "EEE") #?(:clj (DayOfWeek/values) :cljs ((.-values DayOfWeek)))))
