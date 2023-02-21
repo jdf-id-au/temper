@@ -157,6 +157,11 @@
 (defn years-away
   ([n from] (t/>> from (t/new-period n :years)))
   ([n] (years-away n (t/today))))
+
+(defn days-of [[start end]]
+  (map #(days-away % start)
+    (range (inc (in-days start end)))))
+
 (s/def ::date
   (s/with-gen #(instance? LocalDate %)
               #(gen/fmap days-away (gen/large-integer* {:min -50 :max +300}))))
