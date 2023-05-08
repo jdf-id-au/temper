@@ -14,7 +14,7 @@
   (:refer-clojure :exclude [format]))
 
 (defn date-time
-  "In `yyyy-MM-DD*HH:MM...`, make character at * a T, then convert.
+  "In `yyyy-MM-dd*HH:mm...`, make character at * a T, then convert.
    For converting sqlite `text default current_timestamp`s, which have a space in that position."
   ; see "extended format" at https://www.iso.org/obp/ui/#iso:std:iso:8601:-1:ed-1:v1:en
   [s] (when s (t/date-time (apply str (-> s vec (assoc 10 "T"))))))
