@@ -1,9 +1,9 @@
 {:paths ["src"]
  :deps {org.clojure/test.check {:mvn/version "1.1.1"}
-        tick/tick {:mvn/version "0.6.0"}}
+        tick/tick {:mvn/version "0.6.2"}}
  :aliases
  {:dev {:extra-paths ["dev" "test"]
         :extra-deps {org.clojure/clojure {:mvn/version "1.11.1"}
                      org.clojure/clojurescript {:mvn/version "1.11.60"}
-                     thheller/shadow-cljs {:mvn/version "2.22.8"}
-                     binaryage/devtools {:mvn/version "1.0.6"}}}}}
+                     thheller/shadow-cljs {:mvn/version "2.24.1"}
+                     binaryage/devtools {:mvn/version "1.0.7"}}}}}
