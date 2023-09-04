@@ -170,6 +170,7 @@
               #(gen/fmap minutes-away (gen/large-integer* {:min (* 24 -60) :max (* 24 60)}))))
 
 (defn pair [i] (vec (repeat 2 i)))
+;; NB It's not explicit that these specs deal with date pairs.
 (s/def ::single (s/with-gen (s/and (s/tuple ::date ::date) #(apply = %))
                             #(gen/fmap pair (s/gen ::date))))
 (s/def ::closed (s/and (s/tuple ::date ::date) #(not (apply t/> %))))
