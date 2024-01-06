@@ -26,7 +26,14 @@
 
 (defn this-year [] (t/int (t/year)))
 (defn now "Local now (tick's is UTC)." [] (t/at (t/new-date) (t/new-time))) ; busywork vs (t/date-time)
-(defn localise [dt] (-> dt (t/in (t/zone)) t/date-time))
+(defn localise
+  ([dt] (-> dt (t/in (t/zone)) t/date-time))
+  ([dt from-zone] (-> dt (t/in from-zone) localise)))
+
+(defn localise-sqlite
+  "Convert sqlite timestamp from UTC and present as LocalDateTime in current zone."
+  [s]
+  (-> s date-time (localise "UTC")))
 
 (def days-of-week (mapv (partial format "EEE") #?(:clj (DayOfWeek/values) :cljs ((.-values DayOfWeek)))))
 (def months-of-year (mapv (partial format "MMM") #?(:clj (Month/values) :cljs ((.-values Month)))))
