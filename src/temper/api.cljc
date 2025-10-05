@@ -169,6 +169,10 @@
   (map #(days-away % start)
     (range (inc (in-days start end)))))
 
+(defn monday-of [d]
+  (let [dow (t/day-of-week d)]
+    (days-away (-> dow #?(:clj .getValue :cljs .value) dec -) d)))
+
 (s/def ::date
   (s/with-gen #(instance? LocalDate %)
               #(gen/fmap days-away (gen/large-integer* {:min -50 :max +300}))))
