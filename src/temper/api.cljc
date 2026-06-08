@@ -21,18 +21,23 @@
 ;; NB 2026-06-08 16:50:38 @js-joda/locale_en-us etc is such a voluminous shitshow
 ;; of broken dependencies I'm just working around it
 (def locale #?(:clj Locale/ENGLISH :cljs nil))
+(declare format)
+(def days-of-week #?(:clj (mapv (partial format "EEE") (DayOfWeek/values))
+                     :cljs ["Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"]))
+(def months-of-year #?(:clj (mapv (partial format "MMM") (Month/values))
+                       :cljs ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"]))
 (def platform-format #?(:clj clojure.core/format :cljs gstring/format))
 (def platform-value #?(:clj #(.getValue %) :cljs #(.value %)))
 (defn pad-02d [n] (platform-format "%02d" n))
 (defn format-workaround [f]
-  (letfn [(MMM [d] (-> d t/month platform-value dec ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"]))
-                   (MM [d] (->> d t/month platform-value pad-02d))
-                   (EEE [d] (-> d t/day-of-week platform-value dec ["Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"]))
-                   (dd [d] (-> d t/day-of-month pad-02d))
-                   (yyyy [d] (-> d t/year platform-value))
-                   (HH [d] (-> d t/hour pad-02d))
-                   (mm [d] (-> d t/minute pad-02d))
-                   (ss [d] (-> d t/second pad-02d))]
+  (letfn [(MMM [d] (-> d t/month platform-value dec months-of-year))
+          (MM [d] (->> d t/month platform-value pad-02d))
+          (EEE [d] (-> d t/day-of-week platform-value dec days-of-week))
+          (dd [d] (-> d t/day-of-month pad-02d))
+          (yyyy [d] (-> d t/year platform-value))
+          (HH [d] (-> d t/hour pad-02d))
+          (mm [d] (-> d t/minute pad-02d))
+          (ss [d] (-> d t/second pad-02d))]
     (case f
       "MMM" MMM
       "MM" MM
@@ -56,9 +61,6 @@
   "Convert sqlite timestamp from UTC and present as LocalDateTime in current zone."
   [s]
   (-> s date-time (localise "UTC")))
-
-(def days-of-week (mapv (partial format "EEE") #?(:clj (DayOfWeek/values) :cljs ((.-values DayOfWeek)))))
-(def months-of-year (mapv (partial format "MMM") #?(:clj (Month/values) :cljs ((.-values Month)))))
 
 (defn date-range-text [[start end]]
   (let [expand (juxt t/year t/month t/day-of-month)
