@@ -1,8 +1,8 @@
 (ns temper.client
-  (:require [tick.alpha.api :as t]
+  (:require [clojure.string]
+            [tick.core :as t]
             [tick.format]
-            [java.time :refer [DayOfWeek LocalDateTime LocalDate]]
-            ["@js-joda/locale_en" :refer [Locale]]))
+            [java.time :refer [DayOfWeek LocalDateTime LocalDate]]))
 
 (defn tick-utils
   "Adapt tick api for @date-io for use by @material-ui/pickers.
@@ -20,7 +20,7 @@
         dateFormat "MMMM d"
         ; FIXME ignores locale
         fmt (fn [d formatString]
-              (if d (t/format (tick.format/formatter formatString (.-ENGLISH Locale)) d)
+              (if d (t/format (tick.format/formatter formatString nil) d)
                     ""))
         parse (fn [v]
                 (letfn
@@ -99,7 +99,7 @@
       (setYear [_ d y] (t/new-date y (t/month d) (t/day-of-month d)))
 
       (mergeDateAndTime [_ d t]
-        (if d (if (instance? LocalDateTime t) (t/at (t/date d) (t/time t)) d)))
+        (when d (when (instance? LocalDateTime t) (t/at (t/date d) (t/time t)) d)))
 
       (getWeekdays [_] (clj->js (map #(fmt % "E")
                                      ((.-values DayOfWeek)))))

@@ -1,14 +1,13 @@
 (ns temper.api
   ; Just cope with start and end being opposites (vs start/finish begin/end)!
   (:require [tick.core :as t]
-            [tick.locale-en-us]
             #?@(:clj [[clojure.spec.alpha :as s]
                       [clojure.spec.gen.alpha :as gen]]
                 :cljs [[cljs.spec.alpha :as s]
                        [cljs.spec.gen.alpha :as gen]
                        [clojure.test.check.generators]
-                       [java.time :refer [LocalDate LocalDateTime DayOfWeek Month]]
-                       ["@js-joda/locale_en" :refer [Locale]]])) ; also see tick.locale-en-us
+                       [goog.string :as gstring]
+                       [java.time :refer [LocalDate LocalDateTime DayOfWeek Month]]]))
   (:import #?@(:clj [[java.time LocalDate LocalDateTime DayOfWeek Month]
                      (java.util Locale)]))
   (:refer-clojure :exclude [format]))
@@ -19,10 +18,33 @@
   ; see "extended format" at https://www.iso.org/obp/ui/#iso:std:iso:8601:-1:ed-1:v1:en
   [s] (when s (t/date-time (apply str (-> s vec (assoc 10 "T"))))))
 
-(def locale #?(:clj Locale/ENGLISH :cljs (.-ENGLISH Locale)))
+;; NB 2026-06-08 16:50:38 @js-joda/locale_en-us etc is such a voluminous shitshow
+;; of broken dependencies I'm just working around it
+(def locale #?(:clj Locale/ENGLISH :cljs nil))
+(def platform-format #?(:clj clojure.core/format :cljs gstring/format))
+(def platform-value #?(:clj #(.getValue %) :cljs #(.value %)))
+(defn pad-02d [n] (platform-format "%02d" n))
+(defn format-workaround [f]
+  (letfn [(MMM [d] (-> d t/month platform-value dec ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"]))
+                   (MM [d] (->> d t/month platform-value pad-02d))
+                   (EEE [d] (-> d t/day-of-week platform-value dec ["Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"]))
+                   (dd [d] (-> d t/day-of-month pad-02d))
+                   (yyyy [d] (-> d t/year platform-value))
+                   (HH [d] (-> d t/hour pad-02d))
+                   (mm [d] (-> d t/minute pad-02d))
+                   (ss [d] (-> d t/second pad-02d))]
+    (case f
+      "MMM" MMM
+      "MM" MM
+      "EEE" EEE
+      "dd/MM/yyyy" (fn [d] (str (dd d) \/ (MM d) \/ (yyyy d)))
+      "dd/MM/yyyy HH:mm:ss" (fn [d] (str (dd d) \/ (MM d) \/ (yyyy d) \space (HH d) \: (mm d) \: (ss d)))
+      "yyyy-MM-dd" (fn [d] (str (yyyy d) \- (MM d) \- (dd d))))))
 (defn format
   "Remember all the perils of java date formatting. You want dd/MM/yyyy HH:mm:ss or :iso."
-  [f d] (t/format (t/formatter f locale) d))
+  [f d]
+  #?(:clj (t/format (t/formatter f locale) d)
+     :cljs ((format-workaround f) d)))
 
 (defn this-year [] (t/int (t/year)))
 (defn now "Local now (tick's is UTC)." [] (t/at (t/new-date) (t/new-time))) ; busywork vs (t/date-time)
@@ -171,7 +193,7 @@
 
 (defn monday-of [d]
   (let [dow (t/day-of-week d)]
-    (days-away (-> dow #?(:clj .getValue :cljs .value) dec -) d)))
+    (days-away (-> dow #?(:clj platform-value :cljs .value) dec -) d)))
 
 (s/def ::date
   (s/with-gen #(instance? LocalDate %)
