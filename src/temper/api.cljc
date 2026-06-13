@@ -21,11 +21,8 @@
 ;; NB 2026-06-08 16:50:38 @js-joda/locale_en-us etc is such a voluminous shitshow
 ;; of broken dependencies I'm just working around it
 (def locale #?(:clj Locale/ENGLISH :cljs nil))
-(declare format)
-(def days-of-week #?(:clj (mapv (partial format "EEE") (DayOfWeek/values))
-                     :cljs ["Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"]))
-(def months-of-year #?(:clj (mapv (partial format "MMM") (Month/values))
-                       :cljs ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"]))
+(declare days-of-week)
+(declare months-of-year)
 (def platform-format #?(:clj clojure.core/format :cljs gstring/format))
 (def platform-value #?(:clj #(.getValue %) :cljs #(.value %)))
 (defn pad-02d [n] (platform-format "%02d" n))
@@ -50,6 +47,11 @@
   [f d]
   #?(:clj (t/format (t/formatter f locale) d)
      :cljs ((format-workaround f) d)))
+
+(def days-of-week #?(:clj (mapv (partial format "EEE") (DayOfWeek/values))
+                     :cljs ["Mon" "Tue" "Wed" "Thu" "Fri" "Sat" "Sun"]))
+(def months-of-year #?(:clj (mapv (partial format "MMM") (Month/values))
+                       :cljs ["Jan" "Feb" "Mar" "Apr" "May" "Jun" "Jul" "Aug" "Sep" "Oct" "Nov" "Dec"]))
 
 (defn this-year [] (t/int (t/year)))
 (defn now "Local now (tick's is UTC)." [] (t/at (t/new-date) (t/new-time))) ; busywork vs (t/date-time)
